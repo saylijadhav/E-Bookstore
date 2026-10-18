@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Beneath the Stars cover">
+  <defs>
+    <linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1f4d"/>
+      <stop offset="0.5" stop-color="#8a3b63"/>
+      <stop offset="1" stop-color="#f08a3c"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#dusk)"/>
+  <g fill="#fff" opacity="0.9">
+    <circle cx="40" cy="60" r="1.6"/><circle cx="360" cy="48" r="1.8"/><circle cx="320" cy="120" r="1.4"/>
+    <circle cx="70" cy="140" r="1.4"/><circle cx="250" cy="40" r="1.4"/><circle cx="130" cy="30" r="1.2"/>
+    <circle cx="380" cy="200" r="1.4"/><circle cx="20" cy="220" r="1.4"/>
+  </g>
+  <g text-anchor="middle" fill="#ffd9b8">
+    <text x="200" y="104" font-family="'Brush Script MT', 'Snell Roundhand', cursive" font-size="64">Beneath</text>
+    <text x="200" y="150" font-family="'Brush Script MT', 'Snell Roundhand', cursive" font-size="30">the</text>
+    <text x="200" y="214" font-family="Georgia, 'Times New Roman', serif" font-size="58" letter-spacing="3">STARS</text>
+  </g>
+  <g fill="#1a0f26">
+    <path d="M120 600 L120 420 Q120 340 160 330 Q176 300 196 330 L196 600 Z"/>
+    <path d="M204 600 L204 340 Q214 296 240 330 Q276 340 280 420 L280 600 Z"/>
+    <circle cx="168" cy="318" r="22"/>
+    <circle cx="238" cy="312" r="22"/>
+  </g>
+  <text x="200" y="298" font-family="Georgia, serif" font-size="11" fill="#ffd9b8" text-anchor="middle" letter-spacing="4" opacity="0">.</text>
+  <text x="200" y="560" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#ffd9b8" text-anchor="middle" letter-spacing="4">A ROMANCE</text>
+  <text x="200" y="584" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="4">JESSICA MARTIN</text>
+</svg>

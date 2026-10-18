@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="The Final Frontier cover">
+  <rect width="400" height="600" fill="#e8873a"/>
+  <rect x="16" y="16" width="368" height="568" fill="#0e2a47"/>
+  <g fill="#ffe3b0" opacity="0.9">
+    <circle cx="50" cy="270" r="2"/><circle cx="350" cy="250" r="2"/><circle cx="90" cy="360" r="1.5"/>
+    <circle cx="330" cy="400" r="1.5"/><circle cx="60" cy="470" r="1.5"/><circle cx="150" cy="300" r="1.5"/>
+  </g>
+  <g font-family="Impact, 'Arial Black', Helvetica, sans-serif" text-anchor="middle" fill="#fff">
+    <text x="200" y="90" font-size="50" letter-spacing="3">THE</text>
+    <text x="200" y="150" font-size="52" letter-spacing="2">FINAL</text>
+    <text x="200" y="208" font-size="50" letter-spacing="1">FRONTIER</text>
+  </g>
+  <g transform="translate(200 330) rotate(35)">
+    <path d="M0 -92 Q26 -50 22 18 L-22 18 Q-26 -50 0 -92 Z" fill="#f4f1ea"/>
+    <circle cx="0" cy="-42" r="11" fill="#2a8bb8" stroke="#0e2a47" stroke-width="3"/>
+    <path d="M-22 -4 L-44 30 L-22 18 Z M22 -4 L44 30 L22 18 Z" fill="#e8873a"/>
+    <path d="M-12 18 L0 60 L12 18 Z" fill="#ffc14d"/>
+    <path d="M-6 18 L0 40 L6 18 Z" fill="#fff3c4"/>
+  </g>
+  <path d="M-40 640 Q200 400 440 640 Z" fill="#2a8bb8"/>
+  <path d="M-20 640 Q200 440 420 640 Z" fill="#2f9d6a" opacity="0.55"/>
+  <text x="300" y="548" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="800" fill="#fff" text-anchor="end" letter-spacing="3">LAURA</text>
+  <text x="300" y="574" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="800" fill="#fff" text-anchor="end" letter-spacing="3">MITCHELL</text>
+</svg>

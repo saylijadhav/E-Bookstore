@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="Joy of Minimalism cover">
+  <rect width="400" height="600" fill="#f7cb27"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#1a1a1a" text-anchor="middle" font-weight="800">
+    <text x="200" y="96" font-size="34" letter-spacing="2">THE JOY OF</text>
+    <text x="200" y="140" font-size="34" letter-spacing="2">MINIMALISM</text>
+  </g>
+  <circle cx="200" cy="210" r="26" fill="#fff6d8"/>
+  <path d="M120 420 V330 A80 80 0 0 1 280 330 V420 H238 V330 A38 38 0 0 0 162 330 V420 Z" fill="#1a1a1a"/>
+  <text x="200" y="500" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="800" fill="#1a1a1a" text-anchor="middle" letter-spacing="3">DANIEL REED</text>
+  <g font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#1a1a1a" text-anchor="middle">
+    <text x="200" y="540">Simplify your life for</text>
+    <text x="200" y="558">greater clarity and happiness</text>
+  </g>
+</svg>

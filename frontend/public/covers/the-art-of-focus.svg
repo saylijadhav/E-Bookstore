@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="The Art of Focus cover">
+  <rect width="400" height="600" fill="#f2eee6"/>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#1d1d1d" text-anchor="middle">
+    <text x="200" y="92" font-size="44" font-weight="700" letter-spacing="1">THE ART OF</text>
+    <text x="200" y="160" font-size="64" font-weight="800" letter-spacing="1">FOCUS</text>
+  </g>
+  <g transform="translate(200 300)">
+    <circle r="82" fill="#c8402f"/>
+    <circle r="62" fill="#f2eee6"/>
+    <circle r="44" fill="#c8402f"/>
+    <circle r="26" fill="#f2eee6"/>
+    <circle r="10" fill="#c8402f"/>
+    <path d="M0 0 L88 -88" stroke="#1d1d1d" stroke-width="6" stroke-linecap="round"/>
+    <path d="M88 -88 l-4 -26 M88 -88 l26 4 M72 -72 l-20 0 M72 -72 l0 20" stroke="#1d1d1d" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#1d1d1d" text-anchor="middle">
+    <text x="200" y="438" font-size="15">How to Prioritize Your Life</text>
+    <text x="200" y="458" font-size="15">for Maximum Productivity</text>
+    <text x="200" y="548" font-size="30" font-weight="700" letter-spacing="3">ARJUN PATEL</text>
+  </g>
+</svg>

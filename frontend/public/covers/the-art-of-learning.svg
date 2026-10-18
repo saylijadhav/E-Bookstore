@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="The Art of Learning cover">
+  <rect width="400" height="600" fill="#d9472b"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#fff" text-anchor="middle" font-weight="800">
+    <text x="200" y="120" font-size="52" letter-spacing="3">THE ART</text>
+    <text x="200" y="176" font-size="52" letter-spacing="3">OF</text>
+    <text x="200" y="232" font-size="52" letter-spacing="3">LEARNING</text>
+  </g>
+  <g transform="translate(200 360)">
+    <circle cx="0" cy="-34" r="34" fill="#ffd23f"/>
+    <rect x="-14" y="-4" width="28" height="22" rx="4" fill="#ffd23f"/>
+    <rect x="-12" y="18" width="24" height="8" rx="3" fill="#7a2a14"/>
+    <path d="M-10 -34 l8 12 l4 -16 l4 16 l8 -12" fill="none" stroke="#7a2a14" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M-92 40 Q-46 22 0 44 Q46 22 92 40 L92 112 Q46 94 0 116 Q-46 94 -92 112 Z" fill="#fff4e0" stroke="#7a2a14" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M0 44 V116" stroke="#7a2a14" stroke-width="5"/>
+    <path d="M-72 62 Q-46 54 -18 66 M-72 80 Q-46 72 -18 84 M72 62 Q46 54 18 66 M72 80 Q46 72 18 84" stroke="#d9472b" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+  <text x="200" y="548" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="4">RAJ PATEL</text>
+</svg>

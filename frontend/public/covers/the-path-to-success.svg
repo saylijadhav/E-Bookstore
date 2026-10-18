@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="The Path to Success cover">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14536f"/>
+      <stop offset="1" stop-color="#0b2f4a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#sky)"/>
+  <g fill="#ffe08a" opacity="0.85">
+    <circle cx="48" cy="250" r="2"/><circle cx="90" cy="300" r="1.5"/><circle cx="330" cy="240" r="2"/>
+    <circle cx="360" cy="330" r="1.5"/><circle cx="60" cy="400" r="1.5"/><circle cx="300" cy="420" r="2"/>
+    <circle cx="150" cy="260" r="1.5"/><circle cx="250" cy="300" r="1.5"/>
+  </g>
+  <g font-family="Impact, 'Arial Black', Helvetica, sans-serif" text-anchor="middle" fill="#f4c542">
+    <text x="200" y="78" font-size="38" fill="#7fd0e0" letter-spacing="2">THE PATH TO</text>
+    <text x="200" y="150" font-size="68" letter-spacing="1">SUCCESS</text>
+  </g>
+  <path d="M60 560 L150 470 Q200 430 214 360 L230 250 L270 250 L250 380 Q240 450 190 500 L120 580 Z" fill="#f4c542"/>
+  <path d="M230 250 L250 205 L290 250 Z" fill="#f4c542"/>
+  <g transform="translate(206 312)" fill="#0b1c2c">
+    <circle cx="0" cy="-34" r="10"/>
+    <path d="M-12 -22 L12 -22 L16 14 L-16 14 Z"/>
+    <path d="M-12 14 L-20 54 L-8 54 L0 20 L8 54 L20 54 L12 14 Z"/>
+    <path d="M12 -20 L36 -48" stroke="#0b1c2c" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <rect x="236" y="246" width="18" height="12" rx="3" fill="#f4c542" transform="translate(0 -6)"/>
+  <text x="200" y="560" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="800" fill="#f4c542" text-anchor="middle" letter-spacing="3" transform="translate(70 0)">JAMES WRIGHT</text>
+</svg>

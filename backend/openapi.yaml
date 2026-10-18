@@ -1,0 +1,852 @@
+openapi: 3.0.3
+info:
+  title: E-Bookstore API
+  version: 2.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  description: |
+    REST API for the E-Bookstore online bookstore. All money values are INR.
+
+    **Pricing rules (server-side, never trusted from the client)**
+    - discount = coupon % of subtotal
+    - tax = 5% of (subtotal - discount)
+    - shipping = INR 49 for orders containing physical books where (subtotal - discount) < INR 500, otherwise free
+    - gift points: 1 point = INR 1 when redeemed; 1 point earned per full INR 100 paid
+    - orders can be cancelled within 48 hours of purchase
+
+    **Sessions**: browsing and the cart work for guests (a guest user is created lazily on the first write).
+    Placing an order requires a signed-in account (`401 UNAUTHENTICATED` for guests).
+    Registering or signing in keeps the guest cart.
+servers:
+  - url: http://127.0.0.1:4000
+    description: Local development (bound to 127.0.0.1; terminate TLS in front of the app in production)
+tags:
+  - name: Auth
+    description: Guest, registered and session handling.
+  - name: Books
+    description: Public catalogue browsing.
+  - name: Cart
+    description: Server-side cart for guests and members.
+  - name: Orders
+    description: Checkout, history and cancellation.
+  - name: Library
+    description: Wishlist and followed writers.
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Create an account (upgrades the current guest session if present)
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, fullName]
+              additionalProperties: false
+              properties:
+                email: { type: string, format: email, maxLength: 100 }
+                password: { type: string, minLength: 10, maxLength: 128 }
+                fullName: { type: string, minLength: 1, maxLength: 100 }
+      responses:
+        "201":
+          description: Account created; session cookie set. New members receive 100 welcome gift points.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserEnvelope" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409":
+          description: Email already registered.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in; merges any guest cart into the account cart
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              additionalProperties: false
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, maxLength: 128 }
+      responses:
+        "200":
+          description: Signed in; session cookie set.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserEnvelope" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401":
+          description: Incorrect email or password (identical response for unknown accounts).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: End the session
+      operationId: logout
+      security: []
+      responses:
+        "204": { description: Signed out. }
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user (member or guest), or null
+      operationId: me
+      security: []
+      responses:
+        "200":
+          description: Current user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    type: object
+                    nullable: true
+                    allOf:
+                      - $ref: "#/components/schemas/User"
+
+  /api/books:
+    get:
+      tags: [Books]
+      summary: List books with filters
+      operationId: listBooks
+      security: []
+      parameters:
+        - name: category
+          in: query
+          description: Category slug (omit for "All").
+          schema: { type: string, maxLength: 60, example: self-help }
+        - name: q
+          in: query
+          description: Case-insensitive search over title and author name.
+          schema: { type: string, maxLength: 100 }
+        - name: format
+          in: query
+          schema: { $ref: "#/components/schemas/BookFormat" }
+        - name: language
+          in: query
+          schema: { type: string, maxLength: 30, example: English }
+        - name: minPrice
+          in: query
+          schema: { type: number, minimum: 0 }
+        - name: maxPrice
+          in: query
+          schema: { type: number, minimum: 0 }
+        - name: authorId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: publisherId
+          in: query
+          description: Browse by brand/publisher.
+          schema: { type: integer }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [relevance, price_asc, price_desc, rating]
+            default: relevance
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+      responses:
+        "200":
+          description: A page of books.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page, pageSize, total]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/BookSummary" }
+                  page: { type: integer }
+                  pageSize: { type: integer }
+                  total: { type: integer }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  /api/home:
+    get:
+      tags: [Books]
+      summary: Landing page rows (Recommended for You, Bestsellers this Month, New Launches)
+      description: Recommendations are personalised from order history when the user has any, otherwise top rated.
+      operationId: home
+      security: []
+      responses:
+        "200":
+          description: Landing rows.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recommended, bestsellers, newLaunches]
+                properties:
+                  recommended:
+                    type: object
+                    required: [personalised, items]
+                    properties:
+                      personalised: { type: boolean }
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/BookSummary" }
+                  bestsellers:
+                    type: array
+                    items: { $ref: "#/components/schemas/BookSummary" }
+                  newLaunches:
+                    type: array
+                    items: { $ref: "#/components/schemas/BookSummary" }
+
+  /api/books/{id}:
+    get:
+      tags: [Books]
+      summary: Book detail with writer bio, rating breakdown, related items and "also bought"
+      operationId: getBook
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Book detail.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BookDetail" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/books/{id}/reviews:
+    post:
+      tags: [Books]
+      summary: Create or update your review (members only)
+      operationId: upsertReview
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rating]
+              additionalProperties: false
+              properties:
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                body: { type: string, maxLength: 1000 }
+      responses:
+        "201": { description: Saved. }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/categories:
+    get:
+      tags: [Books]
+      summary: Genres shown in the left navigation
+      operationId: listCategories
+      security: []
+      responses:
+        "200":
+          description: Categories.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, slug]
+                      properties:
+                        id: { type: integer }
+                        name: { type: string }
+                        slug: { type: string }
+
+  /api/publishers:
+    get:
+      tags: [Books]
+      summary: Brands/publishers with book counts
+      operationId: listPublishers
+      security: []
+      responses:
+        "200":
+          description: Publishers.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, bookCount]
+                      properties:
+                        id: { type: integer }
+                        name: { type: string }
+                        bookCount: { type: integer }
+
+  /api/authors/{id}:
+    get:
+      tags: [Books]
+      summary: Writer profile
+      operationId: getAuthor
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Writer, with whether the current user follows them.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Writer"
+                  - type: object
+                    properties:
+                      following: { type: boolean }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/cart:
+    get:
+      tags: [Cart]
+      summary: Get the cart with computed totals (optionally previewing a coupon and gift points)
+      operationId: getCart
+      security: []
+      parameters:
+        - name: coupon
+          in: query
+          schema: { type: string, maxLength: 20 }
+        - name: usePoints
+          in: query
+          description: Gift points to redeem in the preview (capped by balance and amount payable).
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: Cart contents and totals. Empty for visitors with no session.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    post:
+      tags: [Cart]
+      summary: Set the quantity of a book in the cart (0 removes it)
+      description: Creates a guest session if the caller has none.
+      operationId: upsertCartItem
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookId, quantity]
+              additionalProperties: false
+              properties:
+                bookId: { type: integer, format: int64 }
+                quantity: { type: integer, minimum: 0, maximum: 20 }
+      responses:
+        "200":
+          description: Updated cart.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Cart" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Requested quantity exceeds stock.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/addresses:
+    get:
+      tags: [Orders]
+      summary: Saved delivery addresses for the current user
+      operationId: listAddresses
+      security: []
+      responses:
+        "200":
+          description: Addresses.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Address" }
+
+  /api/orders:
+    get:
+      tags: [Orders]
+      summary: Order history (most recent first)
+      operationId: listOrders
+      security: []
+      responses:
+        "200":
+          description: Orders for the current user.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Order" }
+    post:
+      tags: [Orders]
+      summary: Submit address, compute totals server-side and complete the purchase
+      description: |
+        Runs in a single DB transaction: locks the user and book rows, validates stock, snapshots prices,
+        applies coupon, shipping, tax and gift points, stores the address, creates the order, decrements stock,
+        adjusts gift points and clears the cart. Payment is simulated: COD orders stay `pending`; all other
+        methods are captured immediately and become `paid`.
+      operationId: createOrder
+      security: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Client-generated UUID; a repeated submission returns the original order with HTTP 200.
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentMethod]
+              additionalProperties: false
+              properties:
+                address: { $ref: "#/components/schemas/AddressInput" }
+                addressId:
+                  type: integer
+                  format: int64
+                  description: Use a saved address instead of submitting a new one. One of address / addressId is required.
+                paymentMethod: { $ref: "#/components/schemas/PaymentMethod" }
+                couponCode: { type: string, maxLength: 20 }
+                usePoints: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "201":
+          description: Order created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "200":
+          description: Idempotent replay of an earlier order.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Cart empty or an item is out of stock.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          description: Coupon invalid or expired, or not enough gift points.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Order detail (purchase confirmation)
+      operationId: getOrder
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: The order.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/orders/{id}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an order within 48 hours of purchase
+      description: Restocks physical books, returns redeemed gift points, reverses earned points and marks paid orders refunded.
+      operationId: cancelOrder
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Cancelled order.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Already cancelled/shipped, or the 48-hour window has expired.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/wishlist:
+    get:
+      tags: [Library]
+      summary: Wishlist
+      operationId: getWishlist
+      security: []
+      responses:
+        "200":
+          description: Wishlisted books.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/BookSummary" }
+  /api/wishlist/{bookId}:
+    put:
+      tags: [Library]
+      summary: Add a book to the wishlist
+      operationId: addToWishlist
+      security: []
+      parameters:
+        - { name: bookId, in: path, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        "204": { description: Added. }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Library]
+      summary: Remove a book from the wishlist
+      operationId: removeFromWishlist
+      security: []
+      parameters:
+        - { name: bookId, in: path, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        "204": { description: Removed. }
+
+  /api/writers:
+    get:
+      tags: [Library]
+      summary: Followed writers ("My Writers")
+      operationId: getWriters
+      security: []
+      responses:
+        "200":
+          description: Followed writers.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/Writer"
+                        - type: object
+                          properties:
+                            bookCount: { type: integer }
+  /api/writers/{authorId}:
+    put:
+      tags: [Library]
+      summary: Follow a writer
+      operationId: followWriter
+      security: []
+      parameters:
+        - { name: authorId, in: path, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        "204": { description: Followed. }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Library]
+      summary: Unfollow a writer
+      operationId: unfollowWriter
+      security: []
+      parameters:
+        - { name: authorId, in: path, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        "204": { description: Unfollowed. }
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: bw_session
+      description: Opaque session token (HttpOnly, SameSite=Lax, Secure in production). Only a SHA-256 hash is stored server-side.
+
+  responses:
+    BadRequest:
+      description: Validation failed.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: A registered account is required.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    TooManyRequests:
+      description: Rate limit exceeded.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string, example: VALIDATION_ERROR }
+            message: { type: string, description: "Generic message that is safe to display." }
+            fields:
+              type: object
+              additionalProperties: { type: string }
+
+    User:
+      type: object
+      required: [id, isGuest, giftPoints]
+      properties:
+        id: { type: integer, format: int64 }
+        email: { type: string, nullable: true }
+        fullName: { type: string, nullable: true }
+        isGuest: { type: boolean }
+        giftPoints: { type: integer }
+    UserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+
+    BookFormat:
+      type: string
+      enum: [paperback, hardcover, ebook, audiobook]
+    PaymentMethod:
+      type: string
+      enum: [upi, card, netbanking, wallet, cod]
+
+    AuthorRef:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+
+    BookSummary:
+      type: object
+      required: [id, title, author, category, publisher, tags, format, price, rating, reviewCount, deliveryDays, inStock]
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        author: { $ref: "#/components/schemas/AuthorRef" }
+        category: { type: string, example: Self-help }
+        categorySlug: { type: string }
+        publisher:
+          type: object
+          required: [id, name]
+          properties:
+            id: { type: integer }
+            name: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+          example: [Non-fiction, Self-help]
+        description: { type: string }
+        language: { type: string }
+        format: { $ref: "#/components/schemas/BookFormat" }
+        price: { type: number, example: 149 }
+        rating: { type: number, minimum: 0, maximum: 5, example: 4.7 }
+        reviewCount: { type: integer }
+        coverUrl: { type: string, nullable: true }
+        deliveryDays: { type: integer, description: 0 means instant download. }
+        estimatedDelivery:
+          type: string
+          format: date
+          nullable: true
+          description: Computed server-side from deliveryDays; null for instant downloads.
+        inStock: { type: boolean }
+
+    Writer:
+      type: object
+      required: [id, name, bio]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        bio: { type: string }
+        photoUrl: { type: string, nullable: true }
+
+    Review:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        userName: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    BookDetail:
+      allOf:
+        - $ref: "#/components/schemas/BookSummary"
+        - type: object
+          required: [stock, writer, ratingBreakdown, reviews, related, alsoBought]
+          properties:
+            stock: { type: integer }
+            writer: { $ref: "#/components/schemas/Writer" }
+            ratingBreakdown:
+              type: object
+              description: Count of reviews per star.
+              additionalProperties: { type: integer }
+              example: { "5": 62, "4": 24, "3": 9, "2": 3, "1": 2 }
+            reviews:
+              type: array
+              items: { $ref: "#/components/schemas/Review" }
+            related:
+              type: array
+              description: Same-category and same-author books, excluding this one.
+              items: { $ref: "#/components/schemas/BookSummary" }
+            alsoBought:
+              type: array
+              description: Cross-sell — books purchased together with this one.
+              items: { $ref: "#/components/schemas/BookSummary" }
+
+    CartItem:
+      type: object
+      required: [book, quantity, lineTotal]
+      properties:
+        book: { $ref: "#/components/schemas/BookSummary" }
+        quantity: { type: integer, minimum: 1, maximum: 20 }
+        lineTotal: { type: number }
+
+    Totals:
+      type: object
+      required: [subtotal, discount, tax, shippingFee, pointsRedeemed, pointsEarned, total, currency]
+      properties:
+        subtotal: { type: number, example: 798 }
+        discount: { type: number, example: 79.8 }
+        tax: { type: number, description: "5% of (subtotal - discount).", example: 35.91 }
+        shippingFee: { type: number, example: 0 }
+        pointsRedeemed: { type: integer }
+        pointsEarned: { type: integer }
+        total: { type: number, example: 754.11 }
+        currency: { type: string, enum: [INR] }
+        couponCode: { type: string, nullable: true }
+
+    Cart:
+      type: object
+      required: [items, totals, giftPointsAvailable]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CartItem" }
+        totals: { $ref: "#/components/schemas/Totals" }
+        couponError: { type: string, nullable: true }
+        giftPointsAvailable: { type: integer }
+
+    AddressInput:
+      type: object
+      required: [firstName, lastName, addressLine, email, city, pin, phone, state, country]
+      additionalProperties: false
+      properties:
+        firstName: { type: string, minLength: 1, maxLength: 50 }
+        lastName: { type: string, minLength: 1, maxLength: 50 }
+        addressLine: { type: string, minLength: 1, maxLength: 200 }
+        email: { type: string, format: email, maxLength: 100 }
+        city: { type: string, minLength: 1, maxLength: 60 }
+        pin: { type: string, pattern: "^[0-9]{6}$" }
+        phone: { type: string, pattern: "^[6-9][0-9]{9}$" }
+        state: { type: string, minLength: 1, maxLength: 60 }
+        country: { type: string, minLength: 1, maxLength: 60 }
+    Address:
+      allOf:
+        - $ref: "#/components/schemas/AddressInput"
+        - type: object
+          properties:
+            id: { type: integer, format: int64 }
+
+    OrderItem:
+      type: object
+      required: [bookId, title, quantity, unitPrice]
+      properties:
+        bookId: { type: integer, format: int64 }
+        title: { type: string }
+        format: { $ref: "#/components/schemas/BookFormat" }
+        author: { $ref: "#/components/schemas/AuthorRef" }
+        coverUrl: { type: string, nullable: true }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+
+    Order:
+      type: object
+      required: [id, status, paymentMethod, items, totals, createdAt, cancellable]
+      properties:
+        id: { type: integer, format: int64 }
+        status: { type: string, enum: [pending, paid, shipped, delivered, cancelled] }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethod" }
+        paymentReference: { type: string, nullable: true }
+        estimatedDelivery: { type: string, format: date, nullable: true }
+        createdAt: { type: string, format: date-time }
+        cancelledAt: { type: string, format: date-time, nullable: true }
+        refundedAt: { type: string, format: date-time, nullable: true }
+        cancellable: { type: boolean, description: True while pending/paid and inside the 48-hour window. }
+        cancellableUntil: { type: string, format: date-time, nullable: true }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/OrderItem" }
+        totals: { $ref: "#/components/schemas/Totals" }
+        address: { $ref: "#/components/schemas/AddressInput" }

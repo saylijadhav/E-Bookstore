@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="The Midnight Hour cover">
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16373a"/>
+      <stop offset="1" stop-color="#0a1a1d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#night)"/>
+  <rect x="14" y="14" width="372" height="572" fill="none" stroke="#8fb5a8" stroke-width="1.5" opacity="0.5"/>
+  <g font-family="Georgia, 'Times New Roman', serif" fill="#e9efe9" text-anchor="middle">
+    <text x="200" y="64" font-size="12" letter-spacing="5">A NOVEL</text>
+    <text x="200" y="108" font-size="32" letter-spacing="2">THE</text>
+    <text x="200" y="152" font-size="44" font-weight="700" letter-spacing="2">MIDNIGHT</text>
+    <text x="200" y="198" font-size="44" font-weight="700" letter-spacing="2">HOUR</text>
+  </g>
+  <circle cx="108" cy="290" r="70" fill="url(#glow)"/>
+  <g fill="#050d0f">
+    <rect x="104" y="300" width="8" height="190"/>
+    <path d="M92 296 h32 l-4 -22 h-24 z"/>
+    <path d="M200 400 h40 v90 h-40 z M255 380 h46 v110 h-46 z M316 410 h50 v80 h-50 z"/>
+  </g>
+  <g fill="#ffd27a">
+    <rect x="210" y="414" width="8" height="10"/><rect x="226" y="438" width="8" height="10"/>
+    <rect x="266" y="396" width="8" height="10"/><rect x="284" y="420" width="8" height="10"/>
+    <rect x="330" y="426" width="8" height="10"/>
+    <circle cx="108" cy="288" r="8"/>
+  </g>
+  <g fill="#050d0f" transform="translate(160 408)">
+    <circle cx="0" cy="-8" r="9"/>
+    <path d="M-12 0 L12 0 L18 52 L-18 52 Z"/>
+    <path d="M-16 52 h12 v34 h-12 z M4 52 h12 v34 h-12 z"/>
+  </g>
+  <rect x="0" y="490" width="400" height="110" fill="#050d0f" opacity="0.55"/>
+  <text x="200" y="556" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="#e9efe9" text-anchor="middle" letter-spacing="4">JAMES ADAMS</text>
+</svg>

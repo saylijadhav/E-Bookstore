@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="The Lost Kitten cover">
+  <rect width="400" height="600" fill="#e8832a"/>
+  <g font-family="'Comic Sans MS', 'Chalkboard SE', 'Trebuchet MS', sans-serif" text-anchor="middle" font-weight="800" fill="#ffd23f" stroke="#7a3a0a" stroke-width="2" paint-order="stroke">
+    <text x="200" y="92" font-size="60">The Lost</text>
+    <text x="200" y="158" font-size="64">Kitten</text>
+  </g>
+  <g transform="translate(200 330)">
+    <path d="M-58 -78 L-48 -128 L-12 -92 Z M58 -78 L48 -128 L12 -92 Z" fill="#f3a33d" stroke="#7a3a0a" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="0" cy="40" rx="78" ry="82" fill="#f3a33d" stroke="#7a3a0a" stroke-width="5"/>
+    <ellipse cx="0" cy="-30" rx="72" ry="66" fill="#f3a33d" stroke="#7a3a0a" stroke-width="5"/>
+    <ellipse cx="0" cy="62" rx="44" ry="52" fill="#fff0d6"/>
+    <ellipse cx="0" cy="-12" rx="40" ry="34" fill="#fff0d6"/>
+    <circle cx="-26" cy="-38" r="12" fill="#2a1608"/><circle cx="26" cy="-38" r="12" fill="#2a1608"/>
+    <circle cx="-22" cy="-42" r="4" fill="#fff"/><circle cx="30" cy="-42" r="4" fill="#fff"/>
+    <path d="M-8 -14 h16 l-8 10 Z" fill="#e0607a"/>
+    <path d="M0 -4 V4 M0 4 Q-10 14 -18 8 M0 4 Q10 14 18 8" stroke="#7a3a0a" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M-60 -18 H-92 M-60 -6 H-90 M60 -18 H92 M60 -6 H90" stroke="#7a3a0a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-38 -66 q8 -14 16 0 M22 -66 q8 -14 16 0" stroke="#c46a14" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M60 100 Q130 90 120 20 Q116 -8 96 0" stroke="#7a3a0a" stroke-width="5" fill="#f3a33d" stroke-linecap="round"/>
+  </g>
+  <g fill="#3f8a3a" stroke="#1e4a1c" stroke-width="2">
+    <path d="M30 600 Q40 540 70 500 Q74 560 60 600 Z"/><path d="M60 600 Q90 550 120 540 Q110 580 100 600 Z"/>
+    <path d="M370 600 Q360 540 330 500 Q326 560 340 600 Z"/><path d="M340 600 Q310 550 280 540 Q290 580 300 600 Z"/>
+  </g>
+  <text x="200" y="574" font-family="'Trebuchet MS', Helvetica, sans-serif" font-size="22" font-weight="800" fill="#fff" text-anchor="middle" letter-spacing="3">EMILY PARKER</text>
+</svg>
