@@ -84,7 +84,7 @@ export default function Catalogue() {
     page,
     pageSize: 12,
   };
-  const { data, error, loading, reload } = useAsync(
+  const { data, error, reload } = useAsync(
     () => (filtering ? api.books(query) : Promise.resolve(null)),
     [filtering, JSON.stringify(query)],
   );
@@ -130,7 +130,7 @@ export default function Catalogue() {
         <LandingRows />
       ) : error ? (
         <ErrorNote error={error} onRetry={reload} />
-      ) : loading && !data ? (
+      ) : !data ? (
         <Loading />
       ) : data.items.length === 0 ? (
         <p className="rounded-lg border border-dashed border-ink-600 p-10 text-center text-slate-400">No books match your filters.</p>

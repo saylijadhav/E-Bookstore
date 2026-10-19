@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     host: "127.0.0.1",
     port: 5173,
+    strictPort: true, // backend CORS only allows this exact origin
     proxy: { "/api": "http://127.0.0.1:4000" },
   },
   preview: { host: "127.0.0.1", port: 4173 },
